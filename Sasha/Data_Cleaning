@@ -1,0 +1,120 @@
+#importing packages and shit
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+#loading dataset 
+df=pd.read_csv("/Users/sasha/Desktop/DATASCIENCE/2023/Mini-Project/fake_transactional_data.csv")
+#renaming the rows 
+df=df.rename(columns={'from_totally_fake_account':'from_account', 'monopoly_money_amount':'money_amount', 'to_randomly_generated_account':'to_account', 'not_happened_yet_date':'date'})
+#sanity check to check dimensions of the data i.e the rows
+print('shape:',df.shape)
+originalRows = df.shape[0]
+
+#converting date to date format
+df["date"] = pd.to_datetime(df["date"], dayfirst=True)
+
+print('head:',df.head())
+print('info:', df.info())
+
+print('Date range:', df["date"].min(), df["date"].max())
+
+plt.figure(figsize=(10, 6))
+sns.heatmap(df.isnull(), yticklabels=False, cmap='viridis', cbar=False)
+
+def missing_cols(df):
+    '''prints out columns with its amount of missing values'''
+    total = 0
+    for col in df.columns:
+        missing_vals = df[col].isnull().sum()
+        total += missing_vals
+        if missing_vals != 0:
+            print(f"{col} => {df[col].isnull().sum()}")
+        if missing_vals == 0:
+             print(f"{col} => No missing values")
+        pct = df[col].isna().mean() * 100
+        if (pct != 0):
+            print('{} => {}%'.format(col, round(pct, 2)))
+    
+    if total == 0:
+        print("no missing values left")
+
+print("How many missing values each columns has and what percentage this is:")            
+missing_cols(df)
+
+#dropping empty money values
+print('Dropping rows with empty money amount...')
+df=df.dropna(axis=0, subset="money_amount")
+print('shape:',df.shape)
+print('we have removed', originalRows - df.shape[0], 'rows, this is', 100*(originalRows - df.shape[0])/originalRows, "percent of the dataset")
+print('describe money amount:', df["money_amount"].describe().apply(lambda x: format(x, 'f')))
+print("How many missing values each columns has and what percentage this is:")            
+missing_cols(df)#
+
+#more data cleaning FML
+#
+#working out total expenditure and adding it to a new column
+totalexpend=df.groupby("from_account")[["money_amount"]].sum()
+print(totalexpend)
+#merging both dataframes based on the from account column
+testdf=df.merge(totalexpend, how="left",on="from_account",  )
+#renaming column from default
+testdf=testdf.rename(columns={"money_amount_y":"estimated_expenditure"})
+df=testdf
+print(df)
+#filter out high sums wages?
+#
+#working out income based on expenditure and adding it to a new column
+#need to calculate the multiplier
+income_multiplier=1.5
+incomedf=df["estimated_expenditure"]*income_multiplier
+df["estimated_income"]=incomedf
+
+#function that returns true if the string passed in is an account ID
+def checkAccount(str):
+    try:
+        int(str)
+        return True
+    except ValueError:
+        return False
+
+#creating a df of T/F for each transaction depending on if it is between accounts or not    
+list_Account = df['to_account'].apply(checkAccount)
+
+#Creating lists of indexes for between account transactions and expenditure transactions
+Between=[]
+Expenditure=[]
+for i, value in enumerate(list_Account):
+    if value:
+        Between.append(i)
+    else:
+        Expenditure.append(i)
+
+#Creating 2 dfs, between account transactions and expenditure transactions
+df_between = df.iloc[Between]
+df_expenditure = df.iloc[Expenditure]
+
+#Printing descriptions of these 2 new df's
+print('Between accounts head:', df_between.head())
+print('Between accounts description', df_between.describe())
+
+
+print('Expenditure head:', df_expenditure.head())
+print('Expenditure description', df_expenditure.describe())
+df_expenditure['to_account'].value_counts()
+
+print(df.groupby("date")["money_amount_x"].sum())
+
+#creating new dfs to summarise customers
+df_customers = df.groupby('from_account').agg({'money_amount_x':['min','max','mean','sum','count'], 'estimated_income':'min', 'to_account': pd.Series.mode})
+print('head of customers df:',df_customers.head())
+print('There are {} customers'.format(df_customers.shape[0]))
+
+df_customers_between = df_between.groupby('from_account').agg({'money_amount_x':['min','max','mean','sum','count'], 'estimated_income':'min', 'to_account': pd.Series.mode})
+print('head of customers between df:',df_customers.head())
+
+df_customers_expenditure = df_expenditure.groupby('from_account').agg({'money_amount_x':['min','max','mean','sum','count'], 'estimated_income':'min', 'to_account': pd.Series.mode})
+print('head of customers expenditure df:',df_customers.head())
+
+#df.to_csv('12FebDSMP_df.csv')
