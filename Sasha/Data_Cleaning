@@ -5,12 +5,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 #loading dataset 
-df=pd.read_csv("/Users/sasha/Desktop/DATASCIENCE/2023/Mini-Project/fake_transactional_data.csv")
+df=pd.read_csv("/Users/sasha/Desktop/DATASCIENCE/2023/Mini-Project/data.nosync/fake_transactional_data.csv")
 #renaming the rows 
 df=df.rename(columns={'from_totally_fake_account':'from_account', 'monopoly_money_amount':'money_amount', 'to_randomly_generated_account':'to_account', 'not_happened_yet_date':'date'})
 #sanity check to check dimensions of the data i.e the rows
 print('shape:',df.shape)
-originalRows = df.shape[0]
 
 #converting date to date format
 df["date"] = pd.to_datetime(df["date"], dayfirst=True)
@@ -118,3 +117,9 @@ df_customers_expenditure = df_expenditure.groupby('from_account').agg({'money_am
 print('head of customers expenditure df:',df_customers.head())
 
 #df.to_csv('12FebDSMP_df.csv')
+
+#df_between.to_csv('16FebDSMP_df_between.csv')
+#df_expenditure.to_csv('16FebDSMP_df_expenditure.csv')
+#df_customers_between.to_csv('16FebDSMP_df_customers_between.csv')
+#df_customers_expenditure.to_csv('16FebDSMP_df_customers_expenditure.csv')
+
