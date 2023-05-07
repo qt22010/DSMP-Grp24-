@@ -121,6 +121,9 @@ from scipy.stats import zscore
 df_logz=df_log.apply(zscore)
 print(df_logz)
 
+df_logz.to_csv(r"C:\\users\white\Downloads\rfmlogbasestand.csv")
+
+
 fig, axs = plt.subplots(1, 3, figsize=(15,5))
 axs[0].hist(df_logz['Recency'])
 axs[0].set_title('Recency')
@@ -128,6 +131,9 @@ axs[1].hist(df_logz['Frequency'])
 axs[1].set_title('Frequency')
 axs[2].hist(df_logz['Monetary'])
 axs[2].set_title('Monetary')
+df_logz1=df_logz
+df_logz = df_logz[["Recency", "Frequency", "Monetary"]]
+
 
 wcss = []
 for i in range(1, 11):
@@ -167,45 +173,52 @@ def snake_plot(normalised_df_rfm):
     
     return
 df_logz3=df_logz
+df_logz3c=df_logz1
 kmeans = KMeans(n_clusters=3, init='k-means++', max_iter=300, n_init=10, random_state=0)
 clusters = kmeans.fit_predict(df_logz3)
 
 
 # Add the cluster labels to the original DataFrame
-df_logz3['Cluster'] = clusters
-snake_plot(df_logz3)
+df_logz3c['Cluster'] = clusters
+snake_plot(df_logz3c)
 
 
 df_logz4=df_logz
+df_logz4c=df_logz1
 kmeans = KMeans(n_clusters=4, init='k-means++', max_iter=300, n_init=10, random_state=0)
 clusters = kmeans.fit_predict(df_logz4)
 
 
 # Add the cluster labels to the original DataFrame
-df_logz4['Cluster'] = clusters
-snake_plot(df_logz4)
+df_logz4c['Cluster'] = clusters
+snake_plot(df_logz4c)
 
 df_logz5=df_logz
+df_logz5c=df_logz1
 kmeans = KMeans(n_clusters=5, init='k-means++', max_iter=300, n_init=10, random_state=0)
 clusters = kmeans.fit_predict(df_logz5)
 
 
 # Add the cluster labels to the original DataFrame
-df_logz5['Cluster'] = clusters
-snake_plot(df_logz5)
+df_logz5c['Cluster'] = clusters
+snake_plot(df_logz5c)
+
+df_logz4=df_logz
+kmeans = KMeans(n_clusters=4, init='k-means++', max_iter=300, n_init=10, random_state=0)
+clusters = kmeans.fit_predict(df_logz4)
 
 # Analyze the resulting clusters to identify common characteristics and behaviors of customers in each cluster
-cluster_summary = df_logz.groupby('Cluster').agg({
+"""cluster_summary = df_logz.groupby('Cluster').agg({
     'Recency': 'mean',
     'Frequency': 'mean',
     'Monetary': ['mean', 'count']
 })
 print(cluster_summary)
 
-plt.scatter(df_logz['Recency'], df_logz['Frequency'], c=df_logz['Cluster'])
+plt.scatter(df_logz4c['Recency'], df_logz4c['Frequency'], c=df_logz4c['Cluster'])
 plt.xlabel('Recency')
 plt.ylabel('Frequency')
-plt.show()
+plt.show()"""
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -214,8 +227,22 @@ from mpl_toolkits.mplot3d import Axes3D
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
+
+df_logz4=df_logz
+df_logz4c=df_logz1
+kmeans = KMeans(n_clusters=4, init='k-means++', max_iter=300, n_init=10, random_state=0)
+clusters = kmeans.fit_predict(df_logz4)
+
+
+# Add the cluster labels to the original DataFrame
+df_logz4c['Cluster'] = clusters
+print(df_logz4c)
+print(df_logz4c["Cluster"].unique())
+
+print(df)
+
 # plot the data points
-ax.scatter(df_logz['Recency'], df_logz['Frequency'], df_logz['Monetary'], c=df_logz['Cluster'])
+ax.scatter(df1['Recency'], df1['Frequency'], df1['Monetary'], c=df_logz4c['Cluster'])
 
 # set the axis labels
 ax.set_xlabel('Recency')
@@ -224,5 +251,3 @@ ax.set_zlabel('Monetary')
 
 # show the plot
 plt.show()
-
-
