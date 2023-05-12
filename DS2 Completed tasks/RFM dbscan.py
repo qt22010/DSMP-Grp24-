@@ -13,7 +13,7 @@ import pandas as pd
 
 
 # Load the RFM dataset into a pandas DataFrame
-rfm_df = pd.read_csv(r"C:\\users\white\Downloads\rfmlogbasestand.csv")
+rfm_df = pd.read_csv(r"C:\Users\qt22010\Downloads\rfmlogbasestand.csv")
 
 # Specify the relevant columns as features
 X = rfm_df[["Recency", "Frequency", "Monetary"]]
@@ -38,6 +38,8 @@ distances, indices = nbrs.kneighbors(X)
 distance_desc = sorted(distances[:,k-1], reverse=True)
 fig=px.line(x=list(range(1,len(distance_desc )+1)),y= distance_desc )
 
+
+
 from kneed import KneeLocator
 kneedle = KneeLocator(range(1,len(distance_desc)+1),  #x values
                       distance_desc, # y values
@@ -51,8 +53,7 @@ if kneedle.knee is None:
 else:
     # Add a vertical line to the plot at the knee point
     line_shape = go.layout.Shape(type="line", x0=kneedle.knee, y0=0, x1=kneedle.knee, y1=max(distance_desc), line=dict(color='red', width=2, dash='dash'))
-    fig.update_layout(shapes=[line_shape])
-
+    fig.update_layout(width=1100, height=1500, template="plotly_white", font=dict(size=18), shapes=[line_shape])
     # Print the knee point and optimal value of eps
     knee_point = kneedle.knee
     eps = distance_desc[knee_point]
@@ -60,13 +61,16 @@ else:
     print(f"Optimal value of eps: {eps:.3f}")
     fig.write_html('knee_plot.html', auto_open=True)
 # Show the plot
+fig.update_layout(width=1100, height=1500, template="plotly_white", font=dict(size=18), shapes=[line_shape])
+# Print the knee point and optimal value of eps
 fig.show()
 
-kneedle.plot_knee_normalized()
+kneedle.plot_knee_normalized(figsize=(12, 8))
 
 kneedle.elbow
 
 kneedle.knee_y
+
 
 
 
@@ -106,12 +110,18 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 
-df=pd.read_csv(r"C:\\users\white\Downloads\graphs.csv")
+df=pd.read_csv(r"C:\Users\qt22010\Downloads\graphs.csv")
 
 # create a figure and a 3D axes object
-fig = plt.figure()
+fig = plt.figure(figsize=(10, 10))
 ax = fig.add_subplot(111, projection='3d')
-ax.scatter(df['Recency'], df['Frequency'], df['Monetary'], c=rfm_df['Cluster'])
+colors = ['r', 'g', 'b', 'm',]
+for i in [0,1,-1,2]:
+    ax.scatter(df['Recency'][rfm_df["Cluster"]==i], 
+               df['Frequency'][rfm_df["Cluster"]==i], 
+               df['Monetary'][rfm_df["Cluster"]==i],
+               c = colors[i])
+
 
 # set the axis labels
 ax.set_xlabel('Recency')
@@ -121,3 +131,47 @@ ax.set_zlabel('Monetary')
 # show the plot
 plt.show()
 
+
+
+
+# show the plot
+"""
+plt.show()
+
+for i in np.arange(0.1,2,0.1):
+    for j in np.arange(3,8,1):
+        # Set up the parameter grid for DBSCAN
+       
+        # Run DBSCAN on the dataset with the best parameters
+        dbscan_result = DBSCAN(eps=i, min_samples=j, n_jobs=-1).fit(X)
+        
+        # Add the cluster labels to the RFM dataset
+        rfm_df['Cluster'] = dbscan_result.labels_
+        
+        # Print the number of clusters and the cluster sizes
+        print("Number of clusters:", len(rfm_df['Cluster'].unique()))
+        print("Cluster sizes:")
+        print(rfm_df['Cluster'].value_counts())
+        
+        import matplotlib.pyplot as plt
+        from mpl_toolkits.mplot3d import Axes3D
+        
+        
+        df=pd.read_csv(r"C:\Users\qt22010\Downloads\graphs.csv")
+        
+        # create a figure and a 3D axes object
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(df['Recency'], df['Frequency'], df['Monetary'], c=rfm_df['Cluster'])
+        
+        # set the axis labels
+        ax.set_xlabel('Recency')
+        ax.set_ylabel('Frequency')
+        ax.set_zlabel('Monetary')
+        title="My Plot (Param 1: {:.2f}, Param 2: {})".format(i, j)
+        plt.title(title)
+        # show the plot
+        plt.show()
+"""
+        
+        
