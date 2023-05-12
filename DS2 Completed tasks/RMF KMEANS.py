@@ -5,15 +5,15 @@ Created on Thu Apr 20 01:10:35 2023
 @author: white
 """
 import pandas as pd
-df10=pd.read_csv(r"C:\\users\white\Downloads\features_seconds.csv")
-df=pd.read_csv(r"C:\\users\white\Downloads\features_seconds.csv")
+df10=pd.read_csv(r"C:\Users\qt22010\Downloads\features_seconds.csv")
+df=pd.read_csv(r"C:\Users\qt22010\Downloads\features_seconds.csv")
 print(df)
 
 
 
 
 
-df1=pd.read_csv("C://users/white/Desktop/DSMP/features_second.csv")
+df1=pd.read_csv(r"C:\Users\qt22010\Downloads\features_second.csv")
 df = df1.merge(df, on="Account Number")
 df=df.sort_values(by="Unnamed: 0")
 df=df.reset_index()
@@ -82,33 +82,22 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 sns.set_style('white')
-fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(15, 5))
+fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(9, 4))
 sns.histplot(df1['Recency'], bins=20, ax=axes[0])
 sns.histplot(df1['Frequency'], bins=20, ax=axes[1])
 sns.histplot(df1['Monetary'], bins=20, ax=axes[2])
-plt.suptitle('Distribution of RFM Metrics by Segment')
+plt.suptitle('Distribution of RFM Metrics')
 plt.show()
 
 # Plot the distribution of RFM scores by segment
 sns.set_style('whitegrid')
-plt.figure(figsize=(8, 6))
+plt.figure(figsize=(9, 6))
 sns.histplot(df1, x='RFM_Score', hue='Segment', multiple='stack', bins=50)
 plt.title('Distribution of RFM Scores by Segment')
 plt.show()
 
 import numpy as np
-df_log=df1
-df_log["Recency"] = np.log(df1["Recency"] + 1)
-df_log["Frequency"] = np.log(df1["Frequency"] + 1)
-df_log["Monetary"] = np.log(df1["Monetary"] + 1)
-f,ax = plt.subplots(1,3,figsize=(9,9))
-sns.distplot(df_log['Recency'],kde=True, ax=ax[0])
-ax[0].set_title('')
-sns.distplot(df_log['Frequency'],kde=True, ax=ax[1])
-ax[1].set_title('')
-sns.distplot(df_log['Monetary'],kde=True, ax=ax[2])
-ax[2].set_title('')
-plt.show()
+#
 
 print(df_log.columns)
 df_log=df_log.drop(columns=['R_Quartile',
@@ -121,7 +110,7 @@ from scipy.stats import zscore
 df_logz=df_log.apply(zscore)
 print(df_logz)
 
-df_logz.to_csv(r"C:\\users\white\Downloads\rfmlogbasestand.csv")
+df_logz.to_csv(r"C:\Users\qt22010\Downloads\rfmlogbasestand.csv")
 
 
 fig, axs = plt.subplots(1, 3, figsize=(15,5))
@@ -140,11 +129,12 @@ for i in range(1, 11):
     kmeans = KMeans(n_clusters=i, init='k-means++', max_iter=300, n_init=10, random_state=0)
     kmeans.fit(df_logz)
     wcss.append(kmeans.inertia_)
-fig, axs = plt.subplots(1, 1, figsize=(5,5))
+fig, axs = plt.subplots(1, 1, figsize=(16,16))
 plt.plot(range(1, 11), wcss)
-plt.title('Elbow Method')
-plt.xlabel('Number of clusters')
-plt.ylabel('WCSS')
+
+plt.xlabel('Number of clusters', fontdict = {'fontsize' : 40})
+plt.ylabel('WCSS',  fontdict = {'fontsize' : 40})
+
 plt.show()
 
 
@@ -224,13 +214,13 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 # create a figure and a 3D axes object
-fig = plt.figure()
+fig = plt.figure(figsize=(10, 10))
 ax = fig.add_subplot(111, projection='3d')
 
 
 df_logz4=df_logz
 df_logz4c=df_logz1
-kmeans = KMeans(n_clusters=4, init='k-means++', max_iter=300, n_init=10, random_state=0)
+kmeans = KMeans(n_clusters=5, init='k-means++', max_iter=300, n_init=10, random_state=0)
 clusters = kmeans.fit_predict(df_logz4)
 
 
@@ -241,13 +231,54 @@ print(df_logz4c["Cluster"].unique())
 
 print(df)
 
-# plot the data points
-ax.scatter(df1['Recency'], df1['Frequency'], df1['Monetary'], c=df_logz4c['Cluster'])
+# specify colors for each cluster label
+colors = ['r', 'g', 'b', 'm', 'c']
 
+# plot the data points
+for i in range(5):
+    ax.scatter(df1['Recency'][df_logz4c["Cluster"]==i], 
+               df1['Frequency'][df_logz4c["Cluster"]==i], 
+               df1['Monetary'][df_logz4c["Cluster"]==i], 
+               c=colors[i])
 # set the axis labels
 ax.set_xlabel('Recency')
 ax.set_ylabel('Frequency')
 ax.set_zlabel('Monetary')
 
+colors = plt.cm.cool(df_logz4c)
+
 # show the plot
 plt.show()
+df1.to_csv(r"C:\Users\qt22010\Downloads\graphs.csv")
+df_logz4c.to_csv(r"C:\Users\qt22010\Downloads\infordb.csv")
+print(df_logz4c)
+from sklearn.metrics import silhouette_score
+kmeans = KMeans(n_clusters=3, init='k-means++', max_iter=300, n_init=10, random_state=0)
+clusters = kmeans.fit_predict(df_logz4)
+df_logz4c['Cluster'] = clusters
+# calculate silhouette score
+silhouette_avg = silhouette_score(df_logz4, clusters)
+print("The average silhouette_score is :", silhouette_avg)
+
+kmeans = KMeans(n_clusters=4, init='k-means++', max_iter=300, n_init=10, random_state=0)
+clusters = kmeans.fit_predict(df_logz4)
+df_logz4c['Cluster'] = clusters
+# calculate silhouette score
+silhouette_avg = silhouette_score(df_logz4, clusters)
+print("The average silhouette_score is :", silhouette_avg)
+
+kmeans = KMeans(n_clusters=5, init='k-means++', max_iter=300, n_init=10, random_state=0)
+clusters = kmeans.fit_predict(df_logz4)
+df_logz4c['Cluster'] = clusters
+# calculate silhouette score
+silhouette_avg = silhouette_score(df_logz4, clusters)
+print("The average silhouette_score is :", silhouette_avg)
+
+kmeans = KMeans(n_clusters=6, init='k-means++', max_iter=300, n_init=10, random_state=0)
+clusters = kmeans.fit_predict(df_logz4)
+df_logz4c['Cluster'] = clusters
+# calculate silhouette score
+silhouette_avg = silhouette_score(df_logz4, clusters)
+print("The average silhouette_score is :", silhouette_avg)
+
+print(df_logz4c)
