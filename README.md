@@ -4,7 +4,7 @@
  - Ajay Pirabaharan 1741098
  - Ronak Shetty 
 
-#Content
+ ### Content
  Analysis on transactional data, working with Llyods. Creating models for fraud detection and customer segmentation.
  
  ### Structure of github
